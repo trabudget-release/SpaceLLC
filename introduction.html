@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>経営哲学コンサルティング</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Noto+Serif+JP:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400&display=swap" rel="stylesheet">
+<link rel="preload" as="video" href="images/background.mp4" type="video/mp4">
+<style>
+  :root{
+    --color-bg:#0a0a09;
+    --color-fog:rgba(8,8,7,0.62);
+    --color-fog-strong:rgba(5,5,4,0.82);
+    --color-text:#f4f0e6;
+    --color-text-dim:rgba(244,240,230,0.88);
+    --color-text-faint:rgba(244,240,230,0.62);
+    --color-line:rgba(244,240,230,0.4);
+    --color-line-faint:rgba(244,240,230,0.22);
+    --gold:#c6a15b;
+    --font-en:'Cormorant Garamond', serif;
+    --font-jp:'Noto Serif JP', serif;
+    --font-sans:'Noto Sans JP', sans-serif;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:var(--font-sans);
+    font-weight:300;
+    color:var(--color-text);
+    background:var(--color-bg);
+    line-height:2;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- Background video + fog ---------- */
+  .bg-video{
+    position:fixed;
+    top:0;left:0;
+    width:100vw;height:100vh;
+    object-fit:cover;
+    z-index:-2;
+    opacity:0;
+    transition:opacity 0.3s ease;
+  }
+
+  .bg-video.is-ready{opacity:1;}
+
+  .fog-overlay{
+    position:fixed;
+    top:0;left:0;
+    width:100vw;height:100vh;
+    background:linear-gradient(180deg, var(--color-fog-strong) 0%, var(--color-fog) 20%, var(--color-fog) 80%, var(--color-fog-strong) 100%);
+    z-index:-1;
+  }
+
+  /* ---------- Navbar ---------- */
+  .navbar{
+    position:fixed;
+    top:0;left:0;right:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:44px 0;
+    z-index:100;
+    transition:background 0.6s ease;
+  }
+
+  .navbar.scrolled{
+    background:linear-gradient(180deg, rgba(5,5,4,0.55) 0%, rgba(5,5,4,0) 100%);
+  }
+
+  .navbar .logo-text{
+    font-family:var(--font-jp);
+    font-weight:600;
+    font-size:16px;
+    letter-spacing:0.32em;
+    color:var(--gold);
+    text-shadow:0 0 14px rgba(198,161,91,0.4);
+    white-space:nowrap;
+  }
+
+  main{position:relative;z-index:1;}
+
+  section{
+    position:relative;
+    padding:15vh 24px;
+    max-width:680px;
+    margin:0 auto;
+    text-align:center;
+  }
+
+  /* thin center hairline used between fragments */
+  .mark{
+    width:1px;
+    height:70px;
+    background:linear-gradient(180deg, transparent, var(--color-line), transparent);
+    margin:0 auto 56px;
+    opacity:0;
+    transition:opacity 1.4s ease;
+  }
+
+  .eyebrow{
+    display:block;
+    font-family:var(--font-en);
+    font-style:italic;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.5em;
+    color:var(--gold);
+    text-transform:uppercase;
+    margin-bottom:40px;
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity 1.2s ease, transform 1.2s ease;
+  }
+
+  /* poem-style lead text */
+  .lead-text{
+    font-family:var(--font-jp);
+    font-weight:500;
+    font-size:clamp(17px, 2.1vw, 20px);
+    letter-spacing:0.14em;
+    line-height:2.7;
+    color:var(--color-text);
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity 1.3s ease, transform 1.3s ease;
+  }
+
+  .lead-text br{content:"";display:block;margin-top:0.3em;}
+
+  .reveal.is-visible .mark,
+  .reveal.is-visible .eyebrow,
+  .reveal.is-visible .lead-text,
+  .reveal.is-visible .venn-wrap,
+  .reveal.is-visible .service-list,
+  .reveal.is-visible .cta-button{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{padding-top:32vh;padding-bottom:14vh;}
+
+  /* ---------- Philosophy / Venn ---------- */
+  .philosophy{max-width:760px;}
+
+  .venn-wrap{
+    width:100%;
+    max-width:460px;
+    margin:8px auto 60px;
+    opacity:0;
+    transform:translateY(16px);
+    transition:opacity 1.3s ease 0.1s, transform 1.3s ease 0.1s;
+  }
+
+  .venn-wrap svg{width:100%;height:auto;display:block;}
+
+  .venn-circle{
+    fill:none;
+    stroke:var(--gold);
+    stroke-width:1.6;
+    opacity:0.85;
+  }
+
+  .venn-label-num{
+    font-family:var(--font-en);
+    font-style:italic;
+    font-weight:600;
+    font-size:13px;
+    fill:var(--gold);
+    letter-spacing:0.05em;
+  }
+
+  .venn-label-text{
+    font-family:var(--font-sans);
+    font-weight:500;
+    font-size:12.5px;
+    fill:var(--color-text);
+    letter-spacing:0.06em;
+  }
+
+  .venn-center-text{
+    font-family:var(--font-jp);
+    font-weight:500;
+    font-size:14px;
+    fill:var(--color-text);
+    letter-spacing:0.6em;
+  }
+
+  /* ---------- Services (plain, no cards) ---------- */
+  .services{max-width:600px;}
+
+  .service-list{
+    margin:8px 0 64px;
+    opacity:0;
+    transform:translateY(16px);
+    transition:opacity 1.3s ease 0.1s, transform 1.3s ease 0.1s;
+  }
+
+  .service-item{
+    padding:48px 0;
+    border-top:1px solid var(--color-line);
+  }
+
+  .service-item:last-child{border-bottom:1px solid var(--color-line);}
+
+  .service-name{
+    font-family:var(--font-jp);
+    font-weight:600;
+    font-size:17px;
+    letter-spacing:0.16em;
+    color:var(--color-text);
+    margin-bottom:18px;
+  }
+
+  .service-price{
+    font-family:var(--font-en);
+    font-weight:600;
+    font-size:26px;
+    letter-spacing:0.04em;
+    color:var(--gold);
+    margin-bottom:6px;
+  }
+
+  .service-price .tax-note{
+    font-family:var(--font-sans);
+    font-weight:500;
+    font-size:10.5px;
+    letter-spacing:0.2em;
+    color:var(--color-text-faint);
+    margin-left:8px;
+  }
+
+  .service-note{
+    font-family:var(--font-sans);
+    font-weight:500;
+    font-size:10.5px;
+    letter-spacing:0.2em;
+    color:var(--color-text-faint);
+    margin:14px 0 6px;
+  }
+
+  .service-desc{
+    font-family:var(--font-sans);
+    font-weight:400;
+    font-size:13px;
+    line-height:2.2;
+    letter-spacing:0.04em;
+    color:var(--color-text);
+    margin-top:18px;
+  }
+
+  /* ---------- CTA ---------- */
+  .cta{padding-top:6vh;padding-bottom:28vh;}
+
+  .cta-button{
+    display:inline-block;
+    font-family:var(--font-en);
+    font-style:italic;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.4em;
+    color:var(--color-text);
+    text-decoration:none;
+    padding:18px 0;
+    border-top:1px solid var(--gold);
+    border-bottom:1px solid var(--gold);
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity 1.3s ease, transform 1.3s ease, color 0.5s ease, letter-spacing 0.5s ease;
+  }
+
+  .cta-button:hover{
+    color:var(--gold);
+    letter-spacing:0.5em;
+  }
+
+  /* ---------- Footer ---------- */
+  footer{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    padding:36px 24px 48px;
+    font-family:var(--font-en);
+    font-size:11px;
+    letter-spacing:0.2em;
+    color:var(--color-text-faint);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:640px){
+    section{padding:12vh 22px;}
+    .hero{padding-top:26vh;}
+    .cta{padding-bottom:20vh;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; scroll-behavior:auto !important;}
+    .mark,.eyebrow,.lead-text,.venn-wrap,.service-list,.cta-button{opacity:1 !important; transform:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<video class="bg-video" id="bgVideo" autoplay loop muted playsinline preload="auto">
+  <source src="images/background.mp4" type="video/mp4">
+</video>
+<div class="fog-overlay"></div>
+
+<nav class="navbar" id="navbar">
+  <a href="index.html" style="text-decoration: none;"><span class="logo-text">合同会社SPACE</span></a>
+</nav>
+
+<main>
+
+  <!-- 紹介文 一箇所目 -->
+  <section class="hero reveal">
+    <div class="mark"></div>
+    <p class="lead-text">
+      経営とは、己を経営することである。<br>
+      哲学に根差した静けさで、<br>
+      意思決定の軸を取り戻す時間を。
+    </p>
+  </section>
+
+  <!-- 理念（ベン図） + 紹介文 二箇所目 -->
+  <section class="philosophy reveal">
+    <span class="eyebrow">Philosophy</span>
+
+    <div class="venn-wrap">
+      <svg viewBox="0 0 560 480" xmlns="http://www.w3.org/2000/svg">
+        <circle class="venn-circle" cx="280" cy="190" r="130"></circle>
+        <circle class="venn-circle" cx="215" cy="310" r="130"></circle>
+        <circle class="venn-circle" cx="345" cy="310" r="130"></circle>
+
+        <text class="venn-center-text" x="280" y="268" text-anchor="middle">理念</text>
+
+        <text class="venn-label-num" x="280" y="95" text-anchor="middle">Ⅰ</text>
+        <text class="venn-label-text" x="280" y="120" text-anchor="middle">
+          <tspan x="280" dy="0">一対一の</tspan>
+          <tspan x="280" dy="16">関わり</tspan>
+        </text>
+
+        <text class="venn-label-num" x="150" y="335" text-anchor="middle">Ⅱ</text>
+        <text class="venn-label-text" x="150" y="359" text-anchor="middle">
+          <tspan x="150" dy="0">コミュニティ</tspan>
+          <tspan x="150" dy="16">の運営</tspan>
+        </text>
+
+        <text class="venn-label-num" x="410" y="335" text-anchor="middle">Ⅲ</text>
+        <text class="venn-label-text" x="410" y="359" text-anchor="middle">
+          <tspan x="410" dy="0">戦前の修身を</tspan>
+          <tspan x="410" dy="16">指す教育</tspan>
+        </text>
+      </svg>
+    </div>
+
+    <p class="lead-text">
+      一対一の対話、共に学ぶ場、<br>
+      そして先人の智慧。<br>
+      三つの交わりが、揺るがぬ土台をつくる。
+    </p>
+  </section>
+
+  <!-- サービスの値段と概要 -->
+  <section class="services reveal">
+    <span class="eyebrow">Service</span>
+
+    <div class="service-list">
+      <div class="service-item">
+        <div class="service-name">コンディショニングセッション</div>
+        <div class="service-price">¥369,000<span class="tax-note">税抜</span></div>
+        <p class="service-desc">
+          メンタル、体、スピリットなどの観点で<br>
+          途切れてしまった繋ぎを紡ぎ直し、<br>
+          全体性の健やかさを補います。
+        </p>
+      </div>
+
+      <div class="service-item">
+        <div class="service-name">コンサル付きコンディショニング</div>
+        <div class="service-price">¥550,000<span class="tax-note">税抜</span></div>
+        <p class="service-desc">
+          経営哲学に関するコンサルを提供。<br>
+          コンサルタントであり教師でもある、<br>
+          クライアントの伴走者として<br>
+          魂・メンタル・響きを大切にします。
+        </p>
+      </div>
+
+      <div class="service-item">
+        <div class="service-name">セラピスト兼コンサル</div>
+        <div class="service-price">¥550,000<span class="tax-note">税抜</span></div>
+        <div class="service-note">2〜3年ご利用のお客様限定</div>
+        <p class="service-desc">
+          経営上の課題などを、風水・命術・<br>
+          間奏学・易経などを用いながら<br>
+          改善へと導きます。
+        </p>
+      </div>
+    </div>
+
+    <p class="lead-text">
+      スピリット、メンタル、体。<br>
+      そのすべてに向き合う伴走者として、<br>
+      あなたの経営と人生を支え続けます。
+    </p>
+  </section>
+
+  <!-- コンタクトボタン -->
+  <section class="cta reveal">
+    <a href="inquiry.html" class="cta-button">Contact</a><br><br>
+    <a href="index.html" class="cta-button">Home</a>
+  </section>
+
+</main>
+
+<footer>
+  &copy; 2026 All Rights Reserved.
+</footer>
+
+<script>
+  // scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.18 });
+  revealEls.forEach(el => io.observe(el));
+
+  // navbar subtle darken on scroll
+  const nav = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // show the background video as soon as the very first frame is available,
+  // instead of waiting for it to buffer through
+  const bgVideo = document.getElementById('bgVideo');
+  if(bgVideo){
+    const showVideo = () => bgVideo.classList.add('is-ready');
+    if(bgVideo.readyState >= 2){
+      // already have current frame data
+      showVideo();
+    } else {
+      bgVideo.addEventListener('loadeddata', showVideo, { once:true });
+    }
+  }
+</script>
+
+</body>
+</html>
